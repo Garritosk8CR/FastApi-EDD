@@ -38,6 +38,10 @@ class Event(HashModel):
     class Meta:
         database = redis_conn
 
+@app.get("/deliveries/{pk}/status")
+async def get_deliveries():
+    state = redis_conn.get(f'delivery:{pk}')
+    return json.loads(state) if state is not None else {}
 @app.post("/deliveries/create")
 async def create(request: Request):
     body = await request.json()
@@ -46,4 +50,6 @@ async def create(request: Request):
     event = Event(delivery_id=delivery.pk, type=body['type'], data=json.dumps(body['data']))
     event.save()
     state = consumers.create_delivery({}, event)
-    return state
+    redis_conn.set(f'delivery:{delivery.pk}', json.dumps(state))
+
+    return state if state is not None else {}
