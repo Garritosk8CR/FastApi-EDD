@@ -50,7 +50,7 @@ async def create(request: Request):
     delivery.save()
     event = Event(delivery_id=delivery.pk, type=body['type'], data=json.dumps(body['data']))
     event.save()
-    state = consumers.create_delivery({}, event)
+    state = consumers.CONSUMERS[event.type]({}, event)
     redis_conn.set(f'delivery:{delivery.pk}', json.dumps(state))
 
     return state if state is not None else {}
@@ -61,7 +61,7 @@ async def dispatch(request: Request):
     event = Event(delivery_id=body['delivery_id'], type=body['type'], data=json.dumps(body['data']))
     event.save()
     state = await get_state(body['delivery_id'])
-    new_state = consumers.start_delivery(state, event)
+    new_state = consumers.CONSUMERS[event.type](state, event)
     redis_conn.set(f'delivery:{body["delivery_id"]}', json.dumps(new_state))
 
     return new_state if new_state is not None else {}
