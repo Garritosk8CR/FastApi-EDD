@@ -18,6 +18,13 @@ redis_conn = get_redis_connection(
     decode_responses=True
 )
 
+class Delivery(HashModel):
+    budget: int = 0
+    notes: str = ''
+
+    class Meta:
+        database = redis_conn
+
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
