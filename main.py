@@ -38,6 +38,13 @@ class Event(HashModel):
     class Meta:
         database = redis_conn
 
+def build_state(pk: str):
+    pks = Event.all_pks()
+    all_events = [Event.get(pk) for pk in pks]
+    events = [event for event in all_events if event.delivery_id == pk]
+    
+    return events
+
 @app.get("/deliveries/{pk}/status")
 async def get_state(pk: str):
     state = redis_conn.get(f'delivery:{pk}')
