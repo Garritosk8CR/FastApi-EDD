@@ -4,6 +4,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from redis_om import get_redis_connection, HashModel
 
 
+import consumers
+
+
 app = FastAPI()
 
 app.add_middleware(
@@ -42,4 +45,5 @@ async def create(request: Request):
     delivery.save()
     event = Event(delivery_id=delivery.pk, type=body['type'], data=json.dumps(body['data']))
     event.save()
-    return delivery
+    state = consumers.create_delivery({}, event)
+    return state
