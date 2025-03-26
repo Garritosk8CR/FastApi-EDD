@@ -25,6 +25,14 @@ class Delivery(HashModel):
     class Meta:
         database = redis_conn
 
+class Event(HashModel):
+    delivery_id: str = None
+    type: str
+    data: str
+
+    class Meta:
+        database = redis_conn
+
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
