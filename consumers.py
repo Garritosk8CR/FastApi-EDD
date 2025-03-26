@@ -39,6 +39,9 @@ def deliver_products(state, event):
     new_budget = state['budget'] + int(data['sell_price']) * int(data['quantity'])
     new_quantity = state['quantity'] - int(data['quantity'])
 
+    if new_quantity < 0:
+        raise HTTPException(status_code=400, detail="Insufficient quantity")
+
     return state | {
         "budget": new_budget,
         "sell_price": int(data['sell_price']),
@@ -49,6 +52,7 @@ def deliver_products(state, event):
 def increase_budget(state, event):
     data = json.loads(event.data)
     state['budget'] += int(data['amount'])
+
     return state
 
 CONSUMERS = {
