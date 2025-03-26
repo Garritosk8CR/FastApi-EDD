@@ -1,3 +1,4 @@
+import json
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from redis_om import get_redis_connection, HashModel
@@ -39,4 +40,6 @@ async def create(request: Request):
     body = await request.json()
     delivery = Delivery(budget=body['data']['budget'], notes=body['data']['notes'])
     delivery.save()
+    event = Event(delivery_id=delivery.pk, type=body['type'], data=json.dumps(body['data']))
+    event.save()
     return delivery
