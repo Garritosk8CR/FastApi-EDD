@@ -1,4 +1,5 @@
 import json
+from fastspi import HTTPException
 
 def create_delivery(state, event):
     data = json.loads(event.data)
@@ -12,6 +13,8 @@ def create_delivery(state, event):
     }
 
 def start_delivery(state, event):
+    if state['status'] != "ready":
+        raise HTTPException(status_code=400, detail="Delivery alredy started")
     return state | {
         "status": "active"
     }
@@ -19,6 +22,7 @@ def start_delivery(state, event):
 def pickup_products(state, event):
     data = json.loads(event.data)
     new_budget = state['budget'] - int(data['purchase_price']) * int(data['quantity'])
+
     return state | {
         "budget": new_budget,
         "purchase_price": int(data['purchase_price']),
